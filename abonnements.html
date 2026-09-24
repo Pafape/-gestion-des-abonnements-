@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registre des abonnements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f2e28;
+    --paper:#f4efe4;
+    --paper-2:#eae2d0;
+    --line:#c9bfa4;
+    --gold:#9c7a2e;
+    --red:#8a3b2c;
+    --green:#3d6b52;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Source Serif 4',serif;}
+  header{
+    padding:28px 20px 18px;
+    border-bottom:2px solid var(--ink);
+    background:var(--paper);
+  }
+  header h1{margin:0 0 4px;font-size:26px;font-weight:700;letter-spacing:.2px;}
+  header p{margin:0;color:#5a5147;font-size:14px;}
+  .summary{
+    display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;
+  }
+  .summary div{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    padding:10px 14px;
+    min-width:140px;
+  }
+  .summary .num{font-family:'Source Serif 4',serif;font-size:22px;font-weight:600;}
+  .summary .lbl{font-size:12px;color:#5a5147;margin-top:2px;}
+
+  main{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+
+  .toolbar{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;
+  }
+  input[type=text], select{
+    font-family:'Inter',sans-serif;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:14px;
+    color:var(--ink);
+  }
+  #search{flex:1;min-width:160px;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:9px 14px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+  }
+  button.secondary{background:transparent;color:var(--ink);}
+  button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 10px;font-size:13px;}
+  button.link{border:none;background:none;color:var(--gold);padding:4px 0;text-decoration:underline;font-size:13px;}
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    padding:18px;
+    margin-bottom:22px;
+    display:none;
+  }
+  .card.open{display:block;}
+  .card h2{margin:0 0 14px;font-size:18px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid .full{grid-column:1/-1;}
+  label{display:block;font-size:12px;color:#5a5147;margin-bottom:4px;}
+  input[type=text],input[type=date],input[type=number],textarea{
+    width:100%;padding:8px 9px;border:1px solid var(--line);font-family:'Inter',sans-serif;font-size:14px;background:#fff;color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:50px;}
+  .field{margin-bottom:2px;}
+  .card .actions{margin-top:14px;display:flex;gap:8px;}
+
+  .list{border-top:1px solid var(--ink);}
+  .row{
+    display:grid;
+    grid-template-columns:1.6fr 1fr 1fr .9fr auto;
+    gap:10px;
+    align-items:center;
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .row.archived{opacity:.55;}
+  .row .name{font-family:'Source Serif 4',serif;font-weight:600;font-size:16px;}
+  .row .cat{font-size:12px;color:#5a5147;margin-top:2px;}
+  .row .dates{font-size:13px;}
+  .row .price{font-family:'Source Serif 4',serif;font-size:16px;text-align:right;}
+  .price .pref{color:var(--green);font-size:12px;display:block;font-family:'Inter',sans-serif;}
+  .row .end-soon{color:var(--red);font-weight:600;}
+  .row-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .details{
+    grid-column:1/-1;
+    font-size:13px;
+    color:#4a4237;
+    padding:8px 0 0;
+    display:none;
+    border-top:1px dashed var(--line);
+    margin-top:10px;
+  }
+  .details.open{display:block;}
+  .empty{padding:40px 10px;text-align:center;color:#5a5147;font-size:14px;}
+
+  .settings{margin-bottom:18px;font-size:13px;}
+  .settings summary{cursor:pointer;color:#5a5147;}
+  .settings-body{
+    margin-top:10px;padding:14px;background:var(--paper-2);border:1px solid var(--line);
+    display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+  }
+  .settings-body .field{flex:1;min-width:220px;margin-bottom:0;}
+  .settings-body a{color:var(--gold);}
+  .settings-note{width:100%;font-size:12px;color:#5a5147;margin-top:6px;}
+
+  .modal-bg{
+    display:none;position:fixed;inset:0;background:rgba(31,46,40,.5);z-index:10;
+    align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:#fff;border:1px solid var(--line);max-width:560px;width:100%;padding:22px;
+  }
+  .modal h3{margin:0 0 4px;font-size:18px;}
+  .modal .sub{font-size:12px;color:#5a5147;margin-bottom:14px;}
+  .modal .body{font-size:14px;line-height:1.55;white-space:pre-wrap;}
+  .modal .sources{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;}
+  .modal .sources a{display:block;color:var(--gold);margin-bottom:4px;}
+  .modal .close-row{margin-top:18px;text-align:right;}
+  .spinner{color:#5a5147;font-size:14px;}
+
+  @media (max-width:640px){
+    .row{grid-template-columns:1fr;}
+    .row .price{text-align:left;}
+    .row-actions{flex-direction:row;}
+    .grid{grid-template-columns:1fr;}
+  }
+
+  footer{max-width:920px;margin:0 auto;padding:0 16px 40px;font-size:12px;color:#7a7161;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Registre des abonnements</h1>
+  <p>Suivi de vos abonnements, tarifs et échéances — données stockées uniquement dans ce navigateur.</p>
+  <div class="summary">
+    <div><div class="num" id="sumCount">0</div><div class="lbl">abonnements actifs</div></div>
+    <div><div class="num" id="sumMonthly">0 €</div><div class="lbl">coût mensualisé estimé</div></div>
+    <div><div class="num" id="sumSoon">0</div><div class="lbl">échéance sous 30 jours</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Rechercher un abonnement, une catégorie…">
+    <select id="filter">
+      <option value="active">Actifs</option>
+      <option value="archived">Archivés</option>
+      <option value="all">Tous</option>
+    </select>
+    <button id="btnAdd">+ Ajouter un abonnement</button>
+  </div>
+
+  <details class="settings" id="settingsPanel">
+    <summary>Réglages — clé API Gemini pour la recherche automatique</summary>
+    <div class="settings-body">
+      <div class="field">
+        <label>Clé API Gemini</label>
+        <input type="text" id="f_apikey" placeholder="AIza…">
+      </div>
+      <button id="btnSaveKey">Enregistrer la clé</button>
+      <div class="settings-note">
+        Obtenez une clé gratuite sur <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.
+        Elle reste stockée uniquement dans ce navigateur (jamais dans le fichier ni sur GitHub) et n'est utilisée que lorsque vous cliquez sur « Comparer ».
+      </div>
+    </div>
+  </details>
+
+  <div class="card" id="form">
+    <h2 id="formTitle">Nouvel abonnement</h2>
+    <div class="grid">
+      <div class="field"><label>Nom du service *</label><input type="text" id="f_name"></div>
+      <div class="field"><label>Catégorie</label><input type="text" id="f_cat" placeholder="Streaming, énergie, assurance…"></div>
+      <div class="field"><label>Date de début</label><input type="date" id="f_start"></div>
+      <div class="field"><label>Date de fin (si connue)</label><input type="date" id="f_end"></div>
+      <div class="field"><label>Tarif normal</label><input type="text" id="f_price" placeholder="ex. 12,99 € / mois"></div>
+      <div class="field"><label>Tarif préférentiel obtenu</label><input type="text" id="f_pref" placeholder="ex. 8 € / mois jusqu'en 03/2027"></div>
+      <div class="field"><label>Fréquence de paiement</label>
+        <select id="f_freq">
+          <option value="mensuel">Mensuel</option>
+          <option value="annuel">Annuel</option>
+          <option value="trimestriel">Trimestriel</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="field"><label>Contact / lien de gestion</label><input type="text" id="f_link" placeholder="site, email ou téléphone du service"></div>
+      <div class="field full"><label>Informations utiles (conditions, remise, personne référente…)</label><textarea id="f_notes"></textarea></div>
+    </div>
+    <div class="actions">
+      <button id="btnSave">Enregistrer</button>
+      <button class="secondary" id="btnCancel">Annuler</button>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+</main>
+
+<footer>
+  La recherche « Comparer » interroge Gemini (Google) avec votre propre clé API pour trouver des alternatives et de meilleurs tarifs.
+</footer>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Comparaison</h3>
+    <div class="sub" id="modalSub"></div>
+    <div class="body" id="modalBody"></div>
+    <div class="sources" id="modalSources" style="display:none;"></div>
+    <div class="close-row"><button class="secondary" id="btnCloseModal">Fermer</button></div>
+  </div>
+</div>
+
+<script>
+const KEY = 'abonnements_v1';
+let data = JSON.parse(localStorage.getItem(KEY) || '[]');
+let editingId = null;
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.round((d-now)/86400000);
+}
+
+function parseMonthly(priceStr){
+  if(!priceStr) return 0;
+  const m = priceStr.match(/[\d]+[.,]?\d*/);
+  if(!m) return 0;
+  const v = parseFloat(m[0].replace(',','.'));
+  if(/an|annuel|\/\s*an/i.test(priceStr)) return v/12;
+  if(/trim/i.test(priceStr)) return v/3;
+  return v;
+}
+
+function openForm(item){
+  editingId = item ? item.id : null;
+  document.getElementById('formTitle').textContent = item ? 'Modifier l’abonnement' : 'Nouvel abonnement';
+  document.getElementById('f_name').value = item?.name || '';
+  document.getElementById('f_cat').value = item?.cat || '';
+  document.getElementById('f_start').value = item?.start || '';
+  document.getElementById('f_end').value = item?.end || '';
+  document.getElementById('f_price').value = item?.price || '';
+  document.getElementById('f_pref').value = item?.pref || '';
+  document.getElementById('f_freq').value = item?.freq || 'mensuel';
+  document.getElementById('f_link').value = item?.link || '';
+  document.getElementById('f_notes').value = item?.notes || '';
+  document.getElementById('form').classList.add('open');
+  document.getElementById('f_name').focus();
+}
+function closeForm(){
+  document.getElementById('form').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('btnAdd').onclick = () => openForm(null);
+document.getElementById('btnCancel').onclick = closeForm;
+
+document.getElementById('btnSave').onclick = () => {
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ alert('Le nom du service est requis.'); return; }
+  const item = {
+    id: editingId || uid(),
+    name,
+    cat: document.getElementById('f_cat').value.trim(),
+    start: document.getElementById('f_start').value,
+    end: document.getElementById('f_end').value,
+    price: document.getElementById('f_price').value.trim(),
+    pref: document.getElementById('f_pref').value.trim(),
+    freq: document.getElementById('f_freq').value,
+    link: document.getElementById('f_link').value.trim(),
+    notes: document.getElementById('f_notes').value.trim(),
+    archived: false
+  };
+  if(editingId){
+    const i = data.findIndex(d=>d.id===editingId);
+    item.archived = data[i].archived;
+    data[i] = item;
+  } else {
+    data.push(item);
+  }
+  closeForm();
+  save();
+};
+
+function toggleArchive(id){
+  const i = data.findIndex(d=>d.id===id);
+  data[i].archived = !data[i].archived;
+  save();
+}
+function remove(id){
+  if(!confirm('Supprimer définitivement cet abonnement ?')) return;
+  data = data.filter(d=>d.id!==id);
+  save();
+}
+const APIKEY_KEY = 'gemini_api_key_v1';
+document.getElementById('f_apikey').value = localStorage.getItem(APIKEY_KEY) || '';
+document.getElementById('btnSaveKey').onclick = (e) => {
+  e.preventDefault();
+  const k = document.getElementById('f_apikey').value.trim();
+  localStorage.setItem(APIKEY_KEY, k);
+  document.getElementById('settingsPanel').open = false;
+  alert('Clé enregistrée dans ce navigateur.');
+};
+
+function openModal(title, sub){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub || '';
+  document.getElementById('modalBody').innerHTML = '<div class="spinner">Recherche en cours auprès de Gemini…</div>';
+  document.getElementById('modalSources').style.display = 'none';
+  document.getElementById('modalSources').innerHTML = '';
+  document.getElementById('modalBg').classList.add('open');
+}
+document.getElementById('btnCloseModal').onclick = () => document.getElementById('modalBg').classList.remove('open');
+document.getElementById('modalBg').onclick = (e) => { if(e.target.id==='modalBg') e.currentTarget.classList.remove('open'); };
+
+async function search(item){
+  const key = localStorage.getItem(APIKEY_KEY);
+  if(!key){
+    document.getElementById('settingsPanel').open = true;
+    alert('Ajoutez d’abord votre clé API Gemini dans les réglages ci-dessus.');
+    return;
+  }
+  openModal(`Comparaison — ${item.name}`, item.cat || '');
+  const currentPrice = item.pref || item.price || 'tarif non renseigné';
+  const prompt = `Tu es un assistant qui aide un particulier en France à comparer des abonnements. `
+    + `Fais une recherche web pour trouver des alternatives actuelles à l'abonnement "${item.name}"`
+    + (item.cat ? ` (catégorie : ${item.cat})` : '')
+    + `, dont le tarif actuel est "${currentPrice}". `
+    + `Réponds en français, de façon concise (6 lignes maximum) : liste 2 à 4 alternatives ou offres concurrentes avec leur tarif approximatif, `
+    + `et indique clairement si l'une d'elles est moins chère ou plus avantageuse que l'offre actuelle. Pas d'introduction, va droit au but.`;
+
+  try{
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }]
+      })
+    });
+    if(!resp.ok){
+      const errBody = await resp.text();
+      let msg = `Erreur ${resp.status} lors de l'appel à Gemini.`;
+      if(resp.status===400) msg += ' Vérifiez que la clé API est correcte.';
+      if(resp.status===403) msg += ' Clé invalide, révoquée, ou sans accès à ce modèle.';
+      if(resp.status===429) msg += ' Quota gratuit dépassé pour le moment, réessayez plus tard.';
+      document.getElementById('modalBody').textContent = msg;
+      console.error(errBody);
+      return;
+    }
+    const json = await resp.json();
+    const candidate = json.candidates && json.candidates[0];
+    const text = candidate?.content?.parts?.map(p=>p.text).filter(Boolean).join('\n') || 'Aucune réponse exploitable reçue.';
+    document.getElementById('modalBody').textContent = text;
+
+    const chunks = candidate?.groundingMetadata?.groundingChunks || [];
+    const links = chunks.map(c=>c.web).filter(w=>w && w.uri);
+    if(links.length){
+      const box = document.getElementById('modalSources');
+      box.style.display = 'block';
+      box.innerHTML = '<div style="margin-bottom:6px;color:#5a5147;">Sources :</div>' +
+        links.slice(0,6).map(w=>`<a href="${w.uri}" target="_blank" rel="noopener">${escapeHtml(w.title||w.uri)}</a>`).join('');
+    }
+  } catch(err){
+    document.getElementById('modalBody').textContent = 'La requête a échoué (connexion réseau ou clé invalide).';
+    console.error(err);
+  }
+}
+
+let openDetails = null;
+function toggleDetails(id){
+  openDetails = openDetails === id ? null : id;
+  render();
+}
+
+function render(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const filter = document.getElementById('filter').value;
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  let items = data.filter(d => {
+    if(filter==='active' && d.archived) return false;
+    if(filter==='archived' && !d.archived) return false;
+    if(q && !(d.name+d.cat+d.notes).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  items.sort((a,b)=> (a.end||'9999').localeCompare(b.end||'9999'));
+
+  if(items.length===0){
+    list.innerHTML = '<div class="empty">Aucun abonnement à afficher. Ajoutez-en un pour démarrer votre registre.</div>';
+  }
+
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'row' + (item.archived ? ' archived' : '');
+    const dLeft = daysUntil(item.end);
+    const soon = dLeft !== null && dLeft <= 30 && dLeft >= 0;
+    row.innerHTML = `
+      <div>
+        <div class="name">${escapeHtml(item.name)}</div>
+        <div class="cat">${escapeHtml(item.cat || '—')}</div>
+      </div>
+      <div class="dates">
+        Début : ${item.start || '—'}<br>
+        Fin : <span class="${soon?'end-soon':''}">${item.end || 'indéterminée'}</span>
+      </div>
+      <div>${item.freq}${item.link ? '<br><span style="color:#5a5147;font-size:12px;">'+escapeHtml(item.link)+'</span>' : ''}</div>
+      <div class="price">
+        ${escapeHtml(item.price || '—')}
+        ${item.pref ? '<span class="pref">'+escapeHtml(item.pref)+'</span>' : ''}
+      </div>
+      <div class="row-actions">
+        <button class="ghost" data-act="details">Détails</button>
+        <button class="ghost" data-act="search">Comparer</button>
+        <button class="ghost" data-act="edit">Modifier</button>
+        <button class="ghost" data-act="archive">${item.archived ? 'Réactiver' : 'Archiver'}</button>
+        <button class="link" data-act="delete">Supprimer</button>
+      </div>
+      <div class="details ${openDetails===item.id?'open':''}">${escapeHtml(item.notes) || 'Aucune note.'}</div>
+    `;
+    row.querySelector('[data-act=details]').onclick = () => toggleDetails(item.id);
+    row.querySelector('[data-act=search]').onclick = () => search(item);
+    row.querySelector('[data-act=edit]').onclick = () => openForm(item);
+    row.querySelector('[data-act=archive]').onclick = () => toggleArchive(item.id);
+    row.querySelector('[data-act=delete]').onclick = () => remove(item.id);
+    list.appendChild(row);
+  });
+
+  const active = data.filter(d=>!d.archived);
+  document.getElementById('sumCount').textContent = active.length;
+  document.getElementById('sumMonthly').textContent = active.reduce((s,d)=>s+parseMonthly(d.pref||d.price),0).toFixed(2).replace('.',',') + ' €';
+  document.getElementById('sumSoon').textContent = active.filter(d=>{const n=daysUntil(d.end); return n!==null && n<=30 && n>=0;}).length;
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('filter').addEventListener('change', render);
+
+render();
+</script>
+</body>
+</html>
